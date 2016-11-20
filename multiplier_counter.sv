@@ -51,5 +51,5 @@ module multiplier_counter(
 
   //// Zero logic ////
 
-  assert is_zero = ~|count;
+  assign is_zero = ~|count;
 endmodule
