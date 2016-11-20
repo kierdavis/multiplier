@@ -3,7 +3,7 @@
 module multiplier_datapath(
   // Global synchronisation signals:
   clock,
-  n_reset,
+  reset_n,
   // Internal control signals:
   do_init, // Asserted when we want to set 'a' to 0 and 'q' to the multiplier.
   do_shift, // Asserted when we want to perform the shift-and-add operation on 'a' and 'q'.
@@ -19,7 +19,7 @@ module multiplier_datapath(
 
   //// Ports ////
   input logic clock;
-  input logic n_reset;
+  input logic reset_n;
   input logic do_init;
   input logic do_shift;
   input logic [N-1:0] multiplicand;
@@ -38,8 +38,8 @@ module multiplier_datapath(
   logic carry;
 
   //// Register clock logic ////
-  always_ff @(posedge clock or negedge n_reset) begin
-    if (~n_reset) begin
+  always_ff @(posedge clock or negedge reset_n) begin
+    if (~reset_n) begin
       a <= 0;
       q <= 0;
     end

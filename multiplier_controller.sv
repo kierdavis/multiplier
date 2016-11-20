@@ -3,7 +3,7 @@
 module multiplier_controller(
   // Global synchronisation signals:
   clock,
-  n_reset,
+  reset_n,
   // Multiplier control signals:
   start,
   ready,
@@ -17,7 +17,7 @@ module multiplier_controller(
 
   //// Ports ////
   input logic clock;
-  input logic n_reset;
+  input logic reset_n;
   input logic start;
   output logic ready;
   input logic counter_is_zero;
@@ -30,8 +30,8 @@ module multiplier_controller(
   enum {IDLE, WORKING, DONE} state, next_state;
 
   //// Register clock logic ////
-  always_ff @(posedge clock or negedge n_reset) begin
-    if (~n_reset) begin
+  always_ff @(posedge clock or negedge reset_n) begin
+    if (~reset_n) begin
       state <= IDLE;
     end
     else begin

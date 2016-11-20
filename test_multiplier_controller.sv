@@ -1,7 +1,7 @@
 `timescale 1ms / 1ms
 
 module test_multiplier_controller;
-  logic clock, n_reset, start, ready, counter_is_zero;
+  logic clock, reset_n, start, ready, counter_is_zero;
   logic datapath_do_init, datapath_do_shift;
   logic counter_do_preset, counter_do_decrement;
   logic [4:0] outputs;
@@ -13,12 +13,12 @@ module test_multiplier_controller;
   initial begin
     // Initialise inputs
     clock = 1'd1;
-    n_reset = 1'd0; // Start in the reset state
+    reset_n = 1'd0; // Start in the reset state
     start = 1'd0;
     counter_is_zero = 1'd0;
 
     #100 assert (outputs == 5'b00000); // t=100 check outputs are reset
-    #800 n_reset = 1'd1;               // t=900 exit reset
+    #800 reset_n = 1'd1;               // t=900 exit reset
     #100;                              // t=1000 clock posedge
     #100 assert (outputs == 5'b00000); // t=1100 check outputs unchanged
     #900;                              // t=2000 clock posedge
