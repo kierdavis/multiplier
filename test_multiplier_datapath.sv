@@ -2,7 +2,7 @@
 
 module test_multiplier_datapath;
   // width of datapath in bits.
-  parameter N = 4;
+  localparam N = 4;
 
   logic clock, n_reset, do_init, do_shift;
   logic [N-1:0] multiplicand, multiplier;
