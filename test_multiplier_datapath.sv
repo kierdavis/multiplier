@@ -8,6 +8,8 @@ module test_multiplier_datapath;
   logic [N-1:0] multiplicand, multiplier;
   logic [N*2-1:0] product;
 
+  multiplier_datapath #(.N(N)) multiplier_datapath (.*);
+
   initial begin
     // Initialise inputs
     clock = 1'd1;
