@@ -49,7 +49,7 @@ module test_multiplier_datapath;
     #100 assert (product == {4'd8, 4'd4}); // t=8100 check third stage of computation is completed
 
     #900;                                  // t=9000 clock posedge
-    #100 assert (product == 8'd66);        // t=9100 check final stage of computation is completed#
+    #100 assert (product == 8'd66);        // t=9100 check final stage of computation is completed
 
     #800 do_shift = 1'd0;                  // t=9900 do_shift = 0
     #100;                                  // t=10000 clock posedge
