@@ -4,7 +4,7 @@ module test_multiplier_controller;
   logic clock, n_reset, start, ready, counter_is_zero;
   logic datapath_do_init, datapath_do_shift;
   logic counter_do_preset, counter_do_decrement;
-  logic outputs;
+  logic [4:0] outputs;
 
   multiplier_controller multiplier_controller (.*);
 
