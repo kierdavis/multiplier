@@ -4,7 +4,7 @@ module test_multiplier;
   // Width of datapath in bits.
   localparam N = 4;
 
-  logic clock, n_reset, start, ready;
+  logic clock, reset_n, start, ready;
   logic [N-1:0] multiplicand, multiplier;
   logic [N*2-1:0] product;
 
@@ -13,13 +13,13 @@ module test_multiplier;
   initial begin
     // Initialise inputs.
     clock = 1'd1;
-    n_reset = 1'd0;
+    reset_n = 1'd0;
     start = 1'd0;
     multiplicand = 4'd11;
     multiplier = 4'd6;
 
     #100 assert (product == 8'd0 & ready == 1'd0);   // t=100 check outputs are reset
-    #800 n_reset = 1'd1;                             // t=900 exit reset
+    #800 reset_n = 1'd1;                             // t=900 exit reset
     #100;                                            // t=1000 clock posedge
     #100 assert (product == 8'd0 & ready == 1'd0);   // t=1100 check outputs unchanged
     #800 start = 1'd1;                               // t=1900 assert start

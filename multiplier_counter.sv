@@ -3,7 +3,7 @@
 module multiplier_counter(
   // Global synchronisation signals:
   clock,
-  n_reset,
+  reset_n,
   // Internal control signals:
   do_preset, // Asserted when we want to set the counter to its maximum value.
   do_decrement, // Asserted when we want to decrement the counter by one.
@@ -17,7 +17,7 @@ module multiplier_counter(
 
   //// Ports ////
   input logic clock;
-  input logic n_reset;
+  input logic reset_n;
   input logic do_preset;
   input logic do_decrement;
   output logic is_zero;
@@ -26,8 +26,8 @@ module multiplier_counter(
   logic [C-1:0] count, count_next;
 
   //// Register clock logic ////
-  always_ff @(posedge clock or negedge n_reset) begin
-    if (~n_reset) begin
+  always_ff @(posedge clock or negedge reset_n) begin
+    if (~reset_n) begin
       count <= 0;
     end
     else begin
