@@ -1,22 +1,30 @@
 module multiplier_datapath(
   // Global synchronisation signals
-  input logic clock,
-  input logic n_reset,
+  clock,
+  n_reset,
 
   // Internal control signals
-  input logic do_init, // Asserted when we want to set 'a' to 0 and 'q' to the multiplier.
-  input logic do_shift, // Asserted when we want to perform the shift-and-add operation on 'a' and 'q'.
+  do_init, // Asserted when we want to set 'a' to 0 and 'q' to the multiplier.
+  do_shift, // Asserted when we want to perform the shift-and-add operation on 'a' and 'q'.
 
   // Multiplier data inputs (multiplicand and multiplier)
-  input logic [N-1:0] multiplicand,
-  input logic [N-1:0] multiplier,
+  multiplicand,
+  multiplier,
 
   // Multiplier data outputs
-  output logic [N*2-1:0] product
+  product
 );
 
   // Width of datapath in bits.
   parameter N = 4;
+
+  input logic clock;
+  input logic n_reset;
+  input logic do_init;
+  input logic do_shift;
+  input logic [N-1:0] multiplicand;
+  input logic [N-1:0] multiplier;
+  output logic [N*2-1:0] product;
 
 
   //// Node definitions ////
