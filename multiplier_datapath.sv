@@ -1,3 +1,5 @@
+`timescale 1ms / 1ms
+
 module multiplier_datapath(
   // Global synchronisation signals:
   clock,
