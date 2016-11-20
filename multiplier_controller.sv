@@ -1,13 +1,11 @@
 module multiplier_controller(
-  // Global synchronisation signals
+  // Global synchronisation signals:
   clock,
   n_reset,
-
-  // Multiplier control signals
+  // Multiplier control signals:
   start,
   ready,
-
-  // Internal control signals
+  // Internal control signals:
   counter_is_zero,
   datapath_do_init,
   datapath_do_shift,
@@ -15,9 +13,7 @@ module multiplier_controller(
   counter_do_decrement
 );
 
-
   //// Ports ////
-
   input logic clock;
   input logic n_reset;
   input logic start;
@@ -28,14 +24,10 @@ module multiplier_controller(
   output logic counter_do_preset;
   output logic counter_do_decrement;
 
-
   //// Internal nodes ////
-
   enum {IDLE, WORKING, DONE} state, next_state;
 
-
   //// Register clock logic ////
-
   always_ff @(posedge clock or negedge n_reset) begin
     if (~n_reset) begin
       state <= IDLE;
@@ -45,9 +37,7 @@ module multiplier_controller(
     end
   end
 
-
   //// Next state & output logic ////
-
   always_comb begin
     next_state = state;
     datapath_do_init = 1'd0;
