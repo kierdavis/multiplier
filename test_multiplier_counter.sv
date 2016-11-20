@@ -2,7 +2,7 @@
 
 module test_multiplier_counter;
   // width of datapath in bits.
-  parameter N = 4;
+  localparam N = 4;
 
   logic clock, n_reset, do_preset, do_decrement, is_zero;
 
