@@ -15,6 +15,9 @@ module multiplier_controller(
   counter_do_decrement
 );
 
+
+  //// Ports ////
+
   input logic clock;
   input logic n_reset;
   input logic start;
@@ -25,7 +28,13 @@ module multiplier_controller(
   output logic counter_do_preset;
   output logic counter_do_decrement;
 
+
+  //// Internal nodes ////
+
   enum {IDLE, WORKING, DONE} state, next_state;
+
+
+  //// Register clock logic ////
 
   always_ff @(posedge clock or negedge n_reset) begin
     if (~n_reset) begin
@@ -35,6 +44,9 @@ module multiplier_controller(
       state <= next_state;
     end
   end
+
+
+  //// Next state & output logic ////
 
   always_comb begin
     next_state = state;

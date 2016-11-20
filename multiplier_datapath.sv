@@ -15,8 +15,13 @@ module multiplier_datapath(
   product
 );
 
-  // Width of datapath in bits.
-  parameter N = 4;
+
+  //// Parameters ////
+
+  parameter N = 4; // Width of datapath in bits.
+
+
+  //// Ports ////
 
   input logic clock;
   input logic n_reset;
@@ -27,7 +32,7 @@ module multiplier_datapath(
   output logic [N*2-1:0] product;
 
 
-  //// Node definitions ////
+  //// Internal nodes ////
 
   // Register data outputs:
   logic [N-1:0] a, q;

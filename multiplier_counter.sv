@@ -11,10 +11,14 @@ module multiplier_counter(
   is_zero // Asserted when the counter value equals zero.
 );
 
-  // Width of datapath in bits.
-  parameter N = 4;
-  // Width of counter register in bits.
-  localparam C = $clog2(N);
+
+  //// Parameters ////
+
+  parameter N = 4;          // Width of datapath in bits.
+  localparam C = $clog2(N); // Width of counter register in bits.
+
+
+  //// Ports ////
 
   input logic clock;
   input logic n_reset;
@@ -23,7 +27,7 @@ module multiplier_counter(
   output logic is_zero;
 
 
-  //// Node definitions ////
+  //// Internal nodes ////
 
   logic [C-1:0] count, count_next;
 
