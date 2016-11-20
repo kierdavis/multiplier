@@ -1,20 +1,26 @@
 module multiplier_counter(
   // Global synchronisation signals
-  input logic clock,
-  input logic n_reset,
+  clock,
+  n_reset,
 
   // Internal control signals
-  input logic do_preset, // Asserted when we want to set the counter to its maximum value.
-  input logic do_decrement, // Asserted when we want to decrement the counter by one.
+  do_preset, // Asserted when we want to set the counter to its maximum value.
+  do_decrement, // Asserted when we want to decrement the counter by one.
 
   // Outputs
-  output logic is_zero // Asserted when the counter value equals zero.
+  is_zero // Asserted when the counter value equals zero.
 );
 
   // Width of datapath in bits.
   parameter N = 4;
   // Width of counter register in bits.
   localparam C = $clog2(N);
+
+  input logic clock;
+  input logic n_reset;
+  input logic do_preset;
+  input logic do_decrement;
+  output logic is_zero;
 
 
   //// Node definitions ////

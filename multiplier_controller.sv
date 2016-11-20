@@ -1,19 +1,29 @@
 module multiplier_controller(
   // Global synchronisation signals
-  input logic clock,
-  input logic n_reset,
+  clock,
+  n_reset,
 
   // Multiplier control signals
-  input logic start,
-  output logic ready,
+  start,
+  ready,
 
   // Internal control signals
-  input logic counter_is_zero,
-  output logic datapath_do_init,
-  output logic datapath_do_shift,
-  output logic counter_do_preset,
-  output logic counter_do_decrement
+  counter_is_zero,
+  datapath_do_init,
+  datapath_do_shift,
+  counter_do_preset,
+  counter_do_decrement
 );
+
+  input logic clock;
+  input logic n_reset;
+  input logic start;
+  output logic ready;
+  input logic counter_is_zero;
+  output logic datapath_do_init;
+  output logic datapath_do_shift;
+  output logic counter_do_preset;
+  output logic counter_do_decrement;
 
   enum {IDLE, WORKING, DONE} state, next_state;
 

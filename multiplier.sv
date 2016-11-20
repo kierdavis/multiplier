@@ -1,20 +1,28 @@
 module multiplier(
   // Global synchronisation signals
-  input logic clock,
-  input logic n_reset,
+  clock,
+  n_reset,
 
   // Control signals
-  input logic start,
-  output logic ready,
+  start,
+  ready,
 
   // Data inputs/outputs
-  input logic [N-1:0] multiplicand,
-  input logic [N-1:0] multiplier,
-  output logic [N*2-1:0] product
+  multiplicand,
+  multiplier,
+  product
 );
 
   // Width of datapath in bits.
   parameter N = 4;
+
+  input logic clock;
+  input logic n_reset;
+  input logic start;
+  output logic ready;
+  input logic [N-1:0] multiplicand;
+  input logic [N-1:0] multiplier;
+  output logic [N*2-1:0] product;
   
   logic counter_is_zero;
   logic datapath_do_init;
