@@ -11,7 +11,7 @@ module test_multiplier_counter;
   initial begin
     // Initialise inputs
     clock = 1'd1;
-    n_reset = 1'd0; // Start in the reset state]
+    n_reset = 1'd0; // Start in the reset state
     do_preset = 1'd0;
     do_decrement = 1'd0;
 
