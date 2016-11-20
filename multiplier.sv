@@ -48,7 +48,7 @@ module multiplier(
     .is_zero(counter_is_zero)
   );
 
-  multiplier_controller #(.N(N)) controller (
+  multiplier_controller controller (
     .clock(clock),
     .n_reset(n_reset),
     .start(start),
