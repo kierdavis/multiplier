@@ -1,28 +1,21 @@
 module multiplier_datapath(
-  // Global synchronisation signals
+  // Global synchronisation signals:
   clock,
   n_reset,
-
-  // Internal control signals
+  // Internal control signals:
   do_init, // Asserted when we want to set 'a' to 0 and 'q' to the multiplier.
   do_shift, // Asserted when we want to perform the shift-and-add operation on 'a' and 'q'.
-
-  // Multiplier data inputs (multiplicand and multiplier)
+  // Multiplier data inputs (multiplicand and multiplier):
   multiplicand,
   multiplier,
-
-  // Multiplier data outputs
+  // Multiplier data outputs:
   product
 );
 
-
   //// Parameters ////
-
   parameter N = 4; // Width of datapath in bits.
 
-
   //// Ports ////
-
   input logic clock;
   input logic n_reset;
   input logic do_init;
@@ -31,9 +24,7 @@ module multiplier_datapath(
   input logic [N-1:0] multiplier;
   output logic [N*2-1:0] product;
 
-
   //// Internal nodes ////
-
   // Register data outputs:
   logic [N-1:0] a, q;
   // Register data inputs:
@@ -44,9 +35,7 @@ module multiplier_datapath(
   logic [N-1:0] addend, sum;
   logic carry;
 
-
   //// Register clock logic ////
-
   always_ff @(posedge clock or negedge n_reset) begin
     if (~n_reset) begin
       a <= 0;
@@ -58,9 +47,7 @@ module multiplier_datapath(
     end
   end
 
-
   //// Register input logic ////
-
   always_comb begin
     a_next = a;
     q_next = q;
@@ -76,9 +63,7 @@ module multiplier_datapath(
     end
   end
 
-
   //// ALU ////
-
   // Decide whether we are adding m or 0, based on the LSB of q.
   assign addend = q[0] ? multiplicand : 0;
   // Add 'addend' to 'a'.
@@ -89,8 +74,6 @@ module multiplier_datapath(
   // - discarding the LSB of q
   assign {a_shifted, q_shifted} = {carry, sum, q[N-1:1]};
 
-
   //// Data output ////
-
   assign product = {a, q};
 endmodule

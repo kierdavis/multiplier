@@ -1,39 +1,29 @@
 module multiplier_counter(
-  // Global synchronisation signals
+  // Global synchronisation signals:
   clock,
   n_reset,
-
-  // Internal control signals
+  // Internal control signals:
   do_preset, // Asserted when we want to set the counter to its maximum value.
   do_decrement, // Asserted when we want to decrement the counter by one.
-
-  // Outputs
+  // Outputs:
   is_zero // Asserted when the counter value equals zero.
 );
 
-
   //// Parameters ////
-
   parameter N = 4;          // Width of datapath in bits.
   localparam C = $clog2(N); // Width of counter register in bits.
 
-
   //// Ports ////
-
   input logic clock;
   input logic n_reset;
   input logic do_preset;
   input logic do_decrement;
   output logic is_zero;
 
-
   //// Internal nodes ////
-
   logic [C-1:0] count, count_next;
 
-
   //// Register clock logic ////
-
   always_ff @(posedge clock or negedge n_reset) begin
     if (~n_reset) begin
       count <= 0;
@@ -43,9 +33,7 @@ module multiplier_counter(
     end
   end
 
-
   //// Register input logic ////
-
   always_comb begin
     count_next = count;
 
@@ -58,8 +46,6 @@ module multiplier_counter(
     end
   end
 
-
   //// Zero logic ////
-
   assign is_zero = ~|count;
 endmodule

@@ -2,11 +2,9 @@ module multiplier(
   // Global synchronisation signals
   clock,
   n_reset,
-
   // Control signals
   start,
   ready,
-
   // Data inputs/outputs
   multiplicand,
   multiplier,
