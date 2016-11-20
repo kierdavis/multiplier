@@ -52,7 +52,7 @@ module test_multiplier_datapath;
     #800 do_shift = 1'd0;                  // t=9900 do_shift = 0
     #100;                                  // t=10000 clock posedge
     #100 assert (product == 8'd66);        // t=11000 check registers unchanged
-    $finish;
+    $stop;
   end
 
   always #500 clock = ~clock;
