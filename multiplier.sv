@@ -23,7 +23,7 @@ module multiplier(
   input logic [N-1:0] multiplicand;
   input logic [N-1:0] multiplier;
   output logic [N*2-1:0] product;
-  
+
   logic counter_is_zero;
   logic datapath_do_init;
   logic datapath_do_shift;
