@@ -71,5 +71,4 @@ module machxo2_pico_frontend(
     .multiplier(multiplier),
     .product(product)
   );
-
 endmodule

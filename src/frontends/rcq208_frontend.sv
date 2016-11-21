@@ -94,7 +94,6 @@ module rcq208_frontend(
     .display2_enable_n(display2_enable_n),
     .display3_enable_n(display3_enable_n)
   );
-
 endmodule
 
 
