@@ -1,7 +1,7 @@
 `timescale 1ms / 1ms
 
 module debouncer(clock, reset_n, in, out);
-  localparam COUNTER_BITS = 5;
+  parameter COUNTER_BITS = 5;
 
   input logic clock;
   input logic reset_n;
