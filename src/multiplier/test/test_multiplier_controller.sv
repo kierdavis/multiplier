@@ -26,17 +26,21 @@ module test_multiplier_controller;
     #700 start = 1'd1;                 // t=2800 assert start
     #100 assert (outputs == 5'b01010); // t=2900 check datapath_do_init and counter_do_preset are asserted
     #100;                              // t=3000 clock posedge
-    #800 start = 1'd0;                 // t=3800 deassert start
-    #100 assert (outputs == 5'b00101); // t=3900 check datapath_do_shift and counter_do_decrement are asserted
+    #900 assert (outputs == 5'b00101); // t=3900 check datapath_do_shift and counter_do_decrement are asserted
     #100;                              // t=4000 clock posedge
     #900 assert (outputs == 5'b00101); // t=4900 check datapath_do_shift and counter_do_decrement are asserted
     #100;                              // t=5000 clock posedge
     #800 counter_is_zero = 1'd1;       // t=5800 assert counter_is_zero
     #100 assert (outputs == 5'b00100); // t=5900 check only datapath_do_shift is asserted
     #100;                              // t=6000 clock posedge
-    #100 assert (outputs == 5'b10000); // t=6100 check ready asserted
+    #100 assert (outputs == 5'b10000); // t=6100 check ready asserted (DONE state)
     #900;                              // t=7000 clock posedge
-    #100 assert (outputs == 5'b10000); // t=7100 check outputs unchanged
+    #100 assert (outputs == 5'b10000); // t=7100 check outputs unchanged (DONE state)
+    #800 start = 1'd0;                 // t=7900 deassert start
+    #100;                              // t=8000 clock posedge
+    #100 assert (outputs == 5'b00000); // t=8100 check ready deasserted (IDLE state)
+    #900;                              // t=9000 clock posedge
+    #100 assert (outputs == 5'b00000); // t=9100 check ready deasserted (IDLE state)
     $stop;
   end
 
