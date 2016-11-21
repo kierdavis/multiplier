@@ -64,7 +64,7 @@ module machxo2_pico_frontend(
   );
 
   // The actual 4-bit multiplier.
-  multiplier #(.N(4)) multiplier (
+  multiplier #(.N(4)) mult (
     .clock(slow_clock),
     .reset_n(reset_n),
     .start(start),
