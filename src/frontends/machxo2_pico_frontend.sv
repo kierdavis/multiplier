@@ -18,6 +18,7 @@ module machxo2_pico_frontend(
   // Clock frequency setup. Gives 0.992 Hz
   localparam OSCILLATOR_FREQ = "4.16"; // Oscillator freq, in MHz
   localparam FREQ_DIVIDER_BITS = 22; // Width of frequency divider counter
+  localparam USE_SLOW_CLOCK = 0; // whether to use the slow clock instead of the fast clock for the multiplier
 
   input logic button_n;
   output logic led0, led1, led2, led3;
@@ -67,7 +68,7 @@ module machxo2_pico_frontend(
 
   // The actual 4-bit multiplier.
   multiplier #(.N(4)) mult (
-    .clock(slow_clock),
+    .clock(USE_SLOW_CLOCK ? slow_clock : fast_clock),
     .reset_n(reset_n),
     .start(start),
     .ready(),
