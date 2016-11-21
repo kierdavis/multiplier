@@ -41,7 +41,7 @@ module multiplier_controller(
 
   //// Next state & output logic ////
   always_comb begin
-    next_state = state;
+    next_state = IDLE;
     datapath_do_init = 1'd0;
     datapath_do_shift = 1'd0;
     counter_do_preset = 1'd0;
@@ -59,6 +59,9 @@ module multiplier_controller(
           // Go to the "working" state.
           next_state = WORKING;
         end
+        else begin
+          next_state = IDLE;
+        end
       end
 
       WORKING: begin
@@ -69,14 +72,16 @@ module multiplier_controller(
           next_state = DONE;
         end
         else begin
-          // Otherwise, decrement the counter.
+          // Otherwise, decrement the counter and repeat.
           counter_do_decrement = 1'd1;
+          next_state = WORKING;
         end
       end
 
       DONE: begin
         // Assert the ready signal and stay in this state forever.
         ready = 1'd1;
+        next_state = DONE;
       end
     endcase
   end
