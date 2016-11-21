@@ -8,7 +8,7 @@ module test_multiplier;
   logic [N-1:0] multiplicand, multiplier;
   logic [N*2-1:0] product;
 
-  multiplier #(.N(N)) m (.*);
+  multiplier #(.N(N)) mult (.*);
 
   initial begin
     // Initialise inputs.
