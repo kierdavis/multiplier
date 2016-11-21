@@ -3,7 +3,7 @@
 module multiplier(
   // Global synchronisation signals
   clock,
-  n_reset,
+  reset_n,
   // Control signals
   start,
   ready,
@@ -17,7 +17,7 @@ module multiplier(
   parameter N = 4;
 
   input logic clock;
-  input logic n_reset;
+  input logic reset_n;
   input logic start;
   output logic ready;
   input logic [N-1:0] multiplicand;
@@ -32,7 +32,7 @@ module multiplier(
 
   multiplier_datapath #(.N(N)) datapath (
     .clock(clock),
-    .n_reset(n_reset),
+    .reset_n(reset_n),
     .do_init(datapath_do_init),
     .do_shift(datapath_do_shift),
     .multiplicand(multiplicand),
@@ -42,7 +42,7 @@ module multiplier(
 
   multiplier_counter #(.N(N)) counter (
     .clock(clock),
-    .n_reset(n_reset),
+    .reset_n(reset_n),
     .do_preset(counter_do_preset),
     .do_decrement(counter_do_decrement),
     .is_zero(counter_is_zero)
@@ -50,7 +50,7 @@ module multiplier(
 
   multiplier_controller controller (
     .clock(clock),
-    .n_reset(n_reset),
+    .reset_n(reset_n),
     .start(start),
     .ready(ready),
     .counter_is_zero(counter_is_zero),
