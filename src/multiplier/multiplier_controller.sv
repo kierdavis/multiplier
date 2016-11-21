@@ -79,9 +79,15 @@ module multiplier_controller(
       end
 
       DONE: begin
-        // Assert the ready signal and stay in this state forever.
+        // Assert the ready signal and wait for start to be deasserted.
         ready = 1'd1;
-        next_state = DONE;
+        if (~start) begin
+          // Go back to the idle state.
+          next_state = IDLE;
+        end
+        else begin
+          next_state = DONE;
+        end
       end
     endcase
   end
