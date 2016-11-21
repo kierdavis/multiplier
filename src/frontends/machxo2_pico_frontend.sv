@@ -19,7 +19,7 @@ module machxo2_pico_frontend(
   localparam OSCILLATOR_FREQ = "4.16"; // Oscillator freq, in MHz
   localparam FREQ_DIVIDER_BITS = 22; // Width of frequency divider counter
 
-  input logic button;
+  input logic button_n;
   output logic led0_n, led1_n, led2_n, led3_n;
   output logic led4_n, led5_n, led6_n, led7_n;
 
