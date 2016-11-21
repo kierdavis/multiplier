@@ -1,3 +1,5 @@
+`timescale 1ms / 1ms
+
 // Wrapper for interfacing with the MachXO2 Pico's hardware.
 module machxo2_pico_frontend(
   // LEDs

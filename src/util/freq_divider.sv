@@ -1,3 +1,5 @@
+`timescale 1ms / 1ms
+
 module freq_divider(in_clock, out_clock, reset_n, counter);
   parameter BITS = 8;
 
