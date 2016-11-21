@@ -40,7 +40,8 @@ module machxo2_pico_frontend(
   assign multiplier = 4'd6;
 
   // LEDs show state of 'product'. They are active low.
-  assign {led0, led1, led2, led3, led4, led5, led6, led7} = product;
+  //assign {led0, led1, led2, led3, led4, led5, led6, led7} = product;
+  assign {led0, led1, led2, led3, led4, led5, led6, led7} = {fast_clock, slow_clock, reset_n, button, start, ready, 1'd0};
 
   // Internal oscillator.
   OSCH #(.NOM_FREQ(OSCILLATOR_FREQ)) oscillator (
