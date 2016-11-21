@@ -1,3 +1,5 @@
+`timescale 1ms / 1ms
+
 // Wrapper for interfacing with the RCQ208's hardware.
 module rcq208_frontend(
   // Master clock
