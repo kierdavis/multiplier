@@ -45,8 +45,8 @@ module machxo2_pico_frontend_8bit(
   assign button = ~button_n;
 
   // Multiplier inputs are hard-coded.
-  assign multiplicand = 8'd11;
-  assign multiplier = 8'd6;
+  assign multiplicand = 8'd45;
+  assign multiplier = 8'd174;
 
   // LEDs show state of 'product'. They are active low.
   assign {ledA0, ledA1, ledA2, ledA3, ledA4, ledA5, ledA6, ledA7} = product[15:8];
