@@ -11,14 +11,14 @@ module machxo2_pico_frontend_8bit(
   ledA5, // Pin C3/PL2D
   ledA6, // Pin C2/PL3A
   ledA7, // Pin D1/PL3B
-  ledB0, // Pin SO
-  ledB1, // Pin SI
-  ledB2, // Pin CSS
-  ledB3, // Pin B13
-  ledB4, // Pin A13
-  ledB5, // Pin C10
-  ledB6, // Pin K1
-  ledB7, // Pin K3
+  ledB0, // Pin N4/PB6D/SO
+  ledB1, // Pin P13/PB20D/SI
+  ledB2, // Pin P3/PB4C/CSS
+  ledB3, // Pin B13/PT17C
+  ledB4, // Pin A13/PT17D
+  ledB5, // Pin C10/PT15D
+  ledB6, // Pin K1/PL9A
+  ledB7, // Pin K3/PL9B
   // Push-button
   button_n // Pin N3/PB6A
 );
