@@ -15,6 +15,11 @@ module multiplier_controller(
   counter_do_decrement
 );
 
+  localparam STATE_BITS = 2;
+  localparam IDLE = 2'd0;
+  localparam WORKING = 2'd1;
+  localparam DONE = 2'd2;
+
   //// Ports ////
   input logic clock;
   input logic reset_n;
@@ -27,7 +32,7 @@ module multiplier_controller(
   output logic counter_do_decrement;
 
   //// Internal nodes ////
-  enum {IDLE, WORKING, DONE} state, next_state;
+  logic [STATE_BITS-1:0] state, next_state;
 
   //// Register clock logic ////
   always_ff @(posedge clock or negedge reset_n) begin
@@ -77,6 +82,11 @@ module multiplier_controller(
       DONE: begin
         // Assert the ready signal and stay in this state forever.
         ready = 1'd1;
+      end
+
+      default: begin
+        // Something went wrong; go back to a known state.
+        next_state = IDLE;
       end
     endcase
   end
