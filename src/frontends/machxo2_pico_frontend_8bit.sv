@@ -50,7 +50,7 @@ module machxo2_pico_frontend_8bit(
   assign multiplicand = 8'd45;
   assign multiplier = 8'd174;
 
-  // LEDs show state of 'product'. They are active low.
+  // LEDs show state of 'product'. They are active high.
   assign {ledA0, ledA1, ledA2, ledA3, ledA4, ledA5, ledA6, ledA7} = product[15:8];
   assign {ledB0, ledB1, ledB2, ledB3, ledB4, ledB5, ledB6, ledB7} = product[7:0];
 

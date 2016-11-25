@@ -40,7 +40,7 @@ module machxo2_pico_frontend(
   assign multiplicand = 4'd11;
   assign multiplier = 4'd6;
 
-  // LEDs show state of 'product'. They are active low.
+  // LEDs show state of 'product'. They are active high.
   assign {led0, led1, led2, led3, led4, led5, led6, led7} = product;
 
   // Internal oscillator.
