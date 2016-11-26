@@ -11,10 +11,13 @@ stdenv.mkDerivation {
         float # dependency of minted
         framed # dependency of minted
         ifplatform # dependency of minted
+        l3kernel # dependency of siunitx
+        l3packages # dependency of siunitx
         lineno # dependency of minted
         minted
         ms # dependency of todonotes
         pgf # dependency of todonotes
+        siunitx
         todonotes
         xcolor # dependency of minted, todonotes
         xkeyval # dependency of todonotes
