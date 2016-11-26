@@ -1,5 +1,6 @@
 \documentclass[a4paper]{article}
 
+\usepackage[svgnames]{xcolor}
 \usepackage[font=small,format=plain,labelfont=bf,up,textfont=up]{caption}
 \usepackage{fancyvrb}
 \usepackage[margin=2cm]{geometry}
@@ -16,9 +17,18 @@
 \newcommand{\modulelisting}[3]{
   \begin{listing}[p]
     \linespread{.9}\inputminted[fontsize=\scriptsize,linenos]{systemverilog}{#2}
-    \centering\caption{#3}
+    \caption{#3}
     \label{lst:#1}
   \end{listing}
+}
+
+% Args are module name, caption text
+\newcommand{\waveformfigure}[3]{
+  \begin{figure}[p]
+    \centering\includegraphics[width=\textwidth]{assets/#1}
+    \caption{#2}
+    \label{fig:#1}
+  \end{figure}
 }
 
 \title{ELEC2221 D1: Design and test of a sequential multiplier}
@@ -34,6 +44,10 @@ Lab session: November 21, 2016}
 \maketitle
 
 \begin{abstract}
+  % Implemented multiplier
+  % Simulated in ModelSim, with assertions
+  % Synthesised for MachXO2 using Synplify, tested
+  % Extensions: debouncer, 8-bit
   \todo[inline]{blah}
 \end{abstract}
 
@@ -99,11 +113,7 @@ The testbench begins with the reset signal active, and checks that the registers
 \modulelisting{test_multiplier_datapath}{../src/multiplier/test/test_multiplier_datapath.sv}
   {Source code of the \texttt{test\_multiplier\_datapath} module, which tests the operation of the data registers and add/shift computation logic.}
 
-\begin{figure}[p]
-  \centering\includegraphics[width=\textwidth]{assets/test_multiplier_datapath}
-  \centering\caption{Waveform of the \texttt{test\_multiplier\_datapath} testbench.}
-  \label{fig:test_multiplier_datapath}
-\end{figure}
+\waveformfigure{test_multiplier_datapath}{Waveform of the \texttt{test\_multiplier\_datapath} testbench. Values shown in the waveform traces are in hexadecimal.}
 
 \subsection{Synthesis}
 \label{sec:reg:synth}
@@ -126,18 +136,18 @@ In the Done state, the system holds the \texttt{ready} output high, signalling t
   \begin{tikzpicture}[->,
                       node distance=.5cm and .5cm,
                       basenode/.style={draw,text width=3cm,text centered,inner ysep=.25cm,font={\scriptsize}},
-                      state/.style={basenode,rectangle,inner ysep=.5cm},
-                      decision/.style={basenode,diamond,aspect=2,inner ysep=0cm},
-                      condout/.style={basenode,rectangle,rounded corners=.2cm}]
+                      state/.style={basenode,rectangle,inner ysep=.5cm,fill=LightYellow},
+                      decision/.style={basenode,diamond,aspect=2,inner ysep=0cm,fill=LightSkyBlue},
+                      condout/.style={basenode,rectangle,rounded corners=.2cm,fill=LightGreen}]
     \node[coordinate] (begin) {start};
-    \node[state] (idle) [below=of begin] {Idle};
+    \node[state,label={[anchor=west,xshift=1.7cm]90:idle}] (idle) [below=of begin] {};
     \node[decision] (idle-start) [below=of idle] {\texttt{start}};
     \node[condout] (idle-datapath) [below=of idle-start] {\texttt{datapath\_do\_init}};
     \node[condout] (idle-counter) [below=of idle-datapath] {\texttt{counter\_do\_preset}};
-    \node[state] (working) [below=of idle-counter] {Working};
+    \node[state,label={[anchor=west,xshift=1.7cm]90:working}] (working) [below=of idle-counter] {};
     \node[condout] (working-datapath) [below=of working] {\texttt{datapath\_do\_shift}};
     \node[decision] (working-is-zero) [below=of working-datapath] {\texttt{counter\_is\_zero}};
-    \node[state] (done) [below=of working-is-zero] {Done\\\texttt{ready}};
+    \node[state,label={[anchor=west,xshift=1.7cm]90:done}] (done) [below=of working-is-zero] {\texttt{ready}};
     \node[decision] (done-start) [below=of done] {\texttt{start}};
     \node[coordinate] (n1) [right=of idle-start] {};
     \node[coordinate] at (idle -| n1) (n0) {};
@@ -163,14 +173,14 @@ In the Done state, the system holds the \texttt{ready} output high, signalling t
     \draw (done-start) -- node[above,very near start] {1} (n5) -- (n4) -> (done);
     \draw (done-start) -- node[above,very near start] {0} (n7) -- (n6) -> (idle);
   \end{tikzpicture}
-  \caption{An ASM chart representing the operation of the multiplier. Rectangular nodes represent states, and arrows represent possible transition paths. Rounded rectangles represent conditional outputs that should be asserted only when the transition path is taken. Diamonds represent decisions (input tests).}
+  \caption{An ASM chart representing the operation of the multiplier. Rectangular nodes represent states, and arrows represent possible transition paths. The text inside each state node lists the unconditional outputs that are active during that state; the name of the state is instead given by the label at the top-right corner of the node. Rounded rectangles represent conditional outputs that should be asserted only when the transition path is taken. Diamonds represent decisions (input tests).}
   \label{fig:asm}
 \end{figure}
 
 \subsection{Implementation}
 \label{sec:seq:impl}
 
-The 2-bit counter used for counting the number of remaining iterations of the shift/add operation is implemented in the \texttt{multiplier\_counter} module, whose source code is given in Listing~\ref{lst:multiplier_counter}. The remainder of the state machine is implemented in the \texttt{multiplier\_controller} module, whose source code is given in Listing~\ref{lst:multiplier_controller}.
+The 2-bit counter used for counting the number of remaining iterations of the shift/add operation is implemented in the \texttt{multiplier\_counter} module, whose source code is given in Listing~\ref{lst:multiplier_counter}. The remainder of the state machine is implemented in the \texttt{multiplier\_controller} module, whose source code is given in Listing~\ref{lst:multiplier_controller}. After cleaning up some minor syntax errors, the simulation ran first time with all assertions passing.
 
 \modulelisting{multiplier_counter}{../src/multiplier/multiplier_counter.sv}
   {Source code of the \texttt{multiplier\_counter} module, which contains the 2-bit counter that records the number of remaining iterations of the algorithm.}
@@ -181,7 +191,12 @@ The 2-bit counter used for counting the number of remaining iterations of the sh
 \subsection{Simulation}
 \label{sec:seq:sim}
 
-\todo[inline]{todo}
+A testbench for the counter was prepared; its source code is given in Listing~\ref{lst:test_multiplier_counter}. Running this testbench through ModelSim gives the waveform shown in Figure~\ref{fig:test_multiplier_counter}.
+
+\modulelisting{test_multiplier_counter}{../src/multiplier/test/test_multiplier_counter.sv}
+  {Source code of the \texttt{test\_multiplier\_counter} testbench, which tests the 2-bit counter used to keep track of the remaining number of iterations.}
+
+\waveformfigure{test_multiplier_counter}{Waveform of the \texttt{test\_multiplier\_counter} testbench. Values shown in the waveform traces are in hexadecimal.}
 
 \subsection{Synthesis}
 \label{sec:seq:synth}
