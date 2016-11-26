@@ -27,14 +27,10 @@ module multiplier_datapath(
   output logic [N*2-1:0] product;
 
   //// Internal nodes ////
-  // Register data outputs:
-  logic [N-1:0] a, q;
-  // Register data inputs:
-  logic [N-1:0] a_next, q_next;
-  // ALU outputs:
-  logic [N-1:0] a_shifted, q_shifted;
-  // ALU intermediate signals:
-  logic [N-1:0] addend, sum;
+  logic [N-1:0] a, q;                 // Register data outputs
+  logic [N-1:0] a_next, q_next;       // Register data inputs
+  logic [N-1:0] a_shifted, q_shifted; // ALU outputs
+  logic [N-1:0] addend, sum;          // ALU intermediate signals
   logic carry;
 
   //// Register clock logic ////
@@ -53,12 +49,10 @@ module multiplier_datapath(
   always_comb begin
     a_next = a;
     q_next = q;
-
     if (do_init) begin
       a_next = 0;
       q_next = multiplier;
     end
-
     if (do_shift) begin
       a_next = a_shifted;
       q_next = q_shifted;
