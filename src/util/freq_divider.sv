@@ -1,7 +1,7 @@
 `timescale 1ms / 1ms
 
 module freq_divider(in_clock, out_clock, reset_n, counter);
-  parameter BITS = 8;
+  parameter BITS = 22;
 
   input logic in_clock;
   output logic out_clock;
