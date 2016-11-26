@@ -38,11 +38,9 @@ module multiplier_counter(
   //// Register input logic ////
   always_comb begin
     count_next = count;
-
     if (do_preset) begin
       count_next = N-1;
     end
-
     if (do_decrement) begin
       count_next = count - 1;
     end

@@ -47,7 +47,6 @@ module multiplier_controller(
     counter_do_preset = 1'd0;
     counter_do_decrement = 1'd0;
     ready = 1'd0;
-
     case (state)
       IDLE: begin
         // Wait for start signal.

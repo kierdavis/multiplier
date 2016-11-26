@@ -31,17 +31,11 @@ module machxo2_pico_frontend(
   logic [3:0] multiplicand, multiplier;
   logic [7:0] product;
 
-  // No reset button, so just keep it disabled.
-  assign reset_n = 1'd1;
-
-  assign button = ~button_n;
-
-  // Multiplier inputs are hard-coded.
-  assign multiplicand = 4'd11;
-  assign multiplier = 4'd6;
-
-  // LEDs show state of 'product'. They are active high.
+  assign reset_n = 1'd1;       // No reset button, so just keep it disabled.
+  assign button = ~button_n;   // Button is active-low, so make an active-high version.
   assign {led0, led1, led2, led3, led4, led5, led6, led7} = product;
+  assign multiplicand = 4'd11; // Multiplier inputs are hard-coded.
+  assign multiplier = 4'd6;
 
   // Internal oscillator.
   OSCH #(.NOM_FREQ(OSCILLATOR_FREQ)) oscillator (
