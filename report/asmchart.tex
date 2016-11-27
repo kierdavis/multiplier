@@ -1,0 +1,39 @@
+\begin{tikzpicture}[node distance=.5cm,
+                    basenode/.style={draw,text width=3cm,text centered,inner ysep=.25cm,font={\scriptsize}},
+                    state/.style={basenode,rectangle,inner ysep=.5cm,fill=LightYellow},
+                    decision/.style={basenode,diamond,aspect=2,inner ysep=0cm,fill=LightSkyBlue},
+                    condout/.style={basenode,rectangle,rounded corners=.2cm,fill=LightGreen}]
+  \node[coordinate] (begin) {start};
+  \node[state,label={[anchor=west,xshift=1.7cm]90:idle}] (idle) [below=of begin] {};
+  \node[decision] (idle-start) [below=of idle] {\texttt{start}};
+  \node[condout] (idle-datapath) [below=of idle-start] {\texttt{datapath\_do\_init}};
+  \node[condout] (idle-counter) [below=of idle-datapath] {\texttt{counter\_do\_preset}};
+  \node[state,label={[anchor=west,xshift=1.7cm]90:working}] (working) [below=of idle-counter] {};
+  \node[condout] (working-datapath) [below=of working] {\texttt{datapath\_do\_shift}};
+  \node[decision] (working-is-zero) [below=of working-datapath] {\texttt{counter\_is\_zero}};
+  \node[state,label={[anchor=west,xshift=1.7cm]90:done}] (done) [below=of working-is-zero] {\texttt{ready}};
+  \node[decision] (done-start) [below=of done] {\texttt{start}};
+  \node[coordinate] (n1) [right=of idle-start] {};
+  \node[coordinate] at (idle -| n1) (n0) {};
+  \node[condout] (working-counter) [right=of working-datapath] {\texttt{counter\_do\_decrement}};
+  \node[coordinate] at (working -| working-counter) (n2) {};
+  \node[coordinate] at (working-is-zero -| working-counter) (n3) {};
+  \node[coordinate] (n5) [right=of done-start] {};
+  \node[coordinate] at (done -| n5) (n4) {};
+  \node[coordinate] (n7) [left=of done-start] {};
+  \node[coordinate] at (idle -| n7) (n6) {};
+  \draw[->] (begin) -> (idle);
+  \draw[->] (idle) -> (idle-start);
+  \draw[->] (idle-start) -> node[right,very near start] {1} (idle-datapath);
+  \draw[->] (idle-datapath) -> (idle-counter);
+  \draw[->] (idle-counter) -> (working);
+  \draw[->] (working) -> (working-datapath);
+  \draw[->] (working-datapath) -> (working-is-zero);
+  \draw[->] (working-is-zero) -> node[right,very near start] {1} (done);
+  \draw[->] (done) -> (done-start);
+  \draw[->] (idle-start) -- node[above,very near start] {0} (n1) -- (n0) -> (idle);
+  \draw[->] (working-is-zero) -- node[above,very near start] {0} (n3) -> (working-counter);
+  \draw[->] (working-counter) -- (n2) -> (working);
+  \draw[->] (done-start) -- node[above,very near start] {1} (n5) -- (n4) -> (done);
+  \draw[->] (done-start) -- node[above,very near start] {0} (n7) -- (n6) -> (idle);
+\end{tikzpicture}

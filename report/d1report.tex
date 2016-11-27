@@ -15,7 +15,7 @@
 
 % Args are module name, filename, caption text
 \newcommand{\modulelisting}[3]{
-  \begin{listing}[p]
+  \begin{listing}[tbp]
     \linespread{.9}\inputminted[fontsize=\scriptsize,linenos]{systemverilog}{#2}
     \caption{#3}
     \label{lst:#1}
@@ -23,15 +23,27 @@
 }
 
 % Args are module name, caption text
-\newcommand{\waveformfigure}[3]{
-  \begin{figure}[p]
-    \centering\includegraphics[width=\textwidth]{assets/#1}
+\newcommand{\waveformfigure}[2]{
+  \begin{figure}[tbp]
+    \centering\includegraphics[width=\textwidth]{assets/waveforms/#1}
     \caption{#2}
-    \label{fig:#1}
+    \label{fig:wave:#1}
   \end{figure}
 }
 
-\title{ELEC2221 D1: Design and test of a sequential multiplier}
+% Args are module name, caption text
+\newcommand{\rtlfigure}[2]{
+  \begin{figure}[tbp]
+    \centering\includegraphics[width=\textwidth]{assets/rtl/#1}
+    \caption{#2}
+    \label{fig:rtl:#1}
+  \end{figure}
+}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.5em}
+
+\title{ELEC2221 D1: Design and Test of a Sequential Multiplier}
 \author{Kier Davis \\
 Username: kad2g15 \\
 Course: MEng Electronic Engineering \\
@@ -44,11 +56,7 @@ Lab session: November 21, 2016}
 \maketitle
 
 \begin{abstract}
-  % Implemented multiplier
-  % Simulated in ModelSim, with assertions
-  % Synthesised for MachXO2 using Synplify, tested
-  % Extensions: debouncer, 8-bit
-  \todo[inline]{blah}
+  A 4-bit unsigned sequential multiplier was implemented in SystemVerilog. The multiplier was thoroughly tested by preparing testbenches for each component of the multiplier, then simulating them in ModelSim. The design was then synthesised for and downloaded onto a Lattice MachXO2 CPLD and tested manually. Finally, the multiplier was extended to operate on 8-bit numbers before being simulated and synthesised again.
 \end{abstract}
 
 \section{Adder design, simulation and synthesis}
@@ -66,7 +74,7 @@ The adder itself is implemented on line 72 of Listing~\ref{lst:multiplier_datapa
 
 The adder was not simulated on its own, but only as a part of \texttt{multiplier\_datapath}; see Section~\ref{sec:reg:sim} for further details.
 
-It can be seen from the results of running the simulation of \texttt{multiplier\_datapath} in ModelSim (illustrated in Figure~\ref{fig:test_multiplier_datapath}) that at the clock edge occurring at time \SI{8000}{\milli\second}, the value of the \texttt{product} signal changes from \texttt{0101 1001} to \texttt{1000 0100}. \texttt{product} is simply the concatenation of the \texttt{a} and \texttt{q} registers, so \texttt{a} must change from \texttt{0101} to \texttt{1000} and \texttt{q} must change from \texttt{1001} to \texttt{0100}. This is consistent with the results obtained by working through the method by hand:
+It can be seen from the results of running the simulation of \texttt{multiplier\_datapath} in ModelSim (illustrated in Figure~\ref{fig:wave:test_multiplier_datapath}) that at the clock edge occurring at time \SI{8000}{\milli\second}, the value of the \texttt{product} signal changes from \texttt{0101 1001} to \texttt{1000 0100}. \texttt{product} is simply the concatenation of the \texttt{a} and \texttt{q} registers, so \texttt{a} must change from \texttt{0101} to \texttt{1000} and \texttt{q} must change from \texttt{1001} to \texttt{0100}. This is consistent with the results obtained by working through the method by hand:
 
 \vspace{10pt}
 \begin{tabular}{ll}
@@ -79,12 +87,7 @@ It can be seen from the results of running the simulation of \texttt{multiplier\
 \end{tabular}
 \vspace{10pt}
 
-This transition, and all other transitions of the \texttt{product} signal, are verified by assertions in the simulation.
-
-\subsection{Synthesis}
-\label{sec:adder:synth}
-
-The adder was synthesised as part of the \texttt{multiplier\_datapath} module; see Section~\ref{sec:reg:synth} for further details.
+This transition, and all other transitions of the \texttt{product} signal, are verified by assertions in the simulation. We can deduce that the adder is functioning correctly.
 
 \section{Register design, simulation and synthesis}
 \label{seg:reg}
@@ -100,25 +103,12 @@ The module takes two control signals, \texttt{do\_init} and \texttt{do\_shift}, 
 
 The source code of the \texttt{multiplier\_datapath} module is given in Listing~\ref{lst:multiplier_datapath}.
 
-\modulelisting{multiplier_datapath}{../src/multiplier/multiplier_datapath.sv}
-  {Source code of the \texttt{multiplier\_datapath} module, which contains the data registers $a$ and $q$ and the add/shift computation logic.}
-
 \subsection{Simulation}
 \label{sec:reg:sim}
 
-A testbench for the \texttt{multiplier\_datapath} module was prepared. Its source code is given in Listing~\ref{lst:test_multiplier_datapath}. The testbench was then simulated using ModelSim, giving the waveform diagram shown in Figure~\ref{fig:test_multiplier_datapath}. After correcting some minor syntax errors, the testbench and the module under test worked first time, without any assertions failing.
+A testbench for the \texttt{multiplier\_datapath} module was prepared. Its source code is given in Listing~\ref{lst:test_multiplier_datapath}. The testbench was then simulated using ModelSim, giving the waveform diagram shown in Figure~\ref{fig:wave:test_multiplier_datapath}. After correcting some minor syntax errors, the testbench and the module under test worked first time, without any assertions failing.
 
-The testbench begins with the reset signal active, and checks that the registers \texttt{a} and \texttt{q} (whose values are concatenated to form the signal \texttt{product}) are reset to zero. It then releases the system from reset, and asserts the \texttt{do\_init} for one clock cycle, checking that \texttt{q} is set to 6, the value arbitrarily chosen for the second multiplier input. It then asserts \texttt{do\_shift} for four of the five following clock cycles, checking the state of the registers at each stage. The results of these operations can be observed in Figure~\ref{fig:test_multiplier_datapath}.
-
-\modulelisting{test_multiplier_datapath}{../src/multiplier/test/test_multiplier_datapath.sv}
-  {Source code of the \texttt{test\_multiplier\_datapath} module, which tests the operation of the data registers and add/shift computation logic.}
-
-\waveformfigure{test_multiplier_datapath}{Waveform of the \texttt{test\_multiplier\_datapath} testbench. Values shown in the waveform traces are in hexadecimal.}
-
-\subsection{Synthesis}
-\label{sec:reg:synth}
-
-\todo[inline]{todo}
+The testbench begins with the reset signal active, and checks that the registers \texttt{a} and \texttt{q} (whose values are concatenated to form the signal \texttt{product}) are reset to zero. It then releases the system from reset, and asserts the \texttt{do\_init} for one clock cycle, checking that \texttt{q} is set to 6, the value arbitrarily chosen for the second multiplier input. It then asserts \texttt{do\_shift} for four of the five following clock cycles, checking the state of the registers at each stage. The results of these operations can be observed in Figure~\ref{fig:wave:test_multiplier_datapath}.
 
 \section{Sequencer design, simulation and synthesis}
 \label{sec:seq}
@@ -131,48 +121,9 @@ While in the Working state, the datapath's \texttt{do\_shift} control input is h
 
 In the Done state, the system holds the \texttt{ready} output high, signalling the end of computation. It waits for the \texttt{start} input to go low again before transitioning back to the Idle state.
 
-\begin{figure}[p]
+\begin{figure}[tbp]
   \centering
-  \begin{tikzpicture}[->,
-                      node distance=.5cm and .5cm,
-                      basenode/.style={draw,text width=3cm,text centered,inner ysep=.25cm,font={\scriptsize}},
-                      state/.style={basenode,rectangle,inner ysep=.5cm,fill=LightYellow},
-                      decision/.style={basenode,diamond,aspect=2,inner ysep=0cm,fill=LightSkyBlue},
-                      condout/.style={basenode,rectangle,rounded corners=.2cm,fill=LightGreen}]
-    \node[coordinate] (begin) {start};
-    \node[state,label={[anchor=west,xshift=1.7cm]90:idle}] (idle) [below=of begin] {};
-    \node[decision] (idle-start) [below=of idle] {\texttt{start}};
-    \node[condout] (idle-datapath) [below=of idle-start] {\texttt{datapath\_do\_init}};
-    \node[condout] (idle-counter) [below=of idle-datapath] {\texttt{counter\_do\_preset}};
-    \node[state,label={[anchor=west,xshift=1.7cm]90:working}] (working) [below=of idle-counter] {};
-    \node[condout] (working-datapath) [below=of working] {\texttt{datapath\_do\_shift}};
-    \node[decision] (working-is-zero) [below=of working-datapath] {\texttt{counter\_is\_zero}};
-    \node[state,label={[anchor=west,xshift=1.7cm]90:done}] (done) [below=of working-is-zero] {\texttt{ready}};
-    \node[decision] (done-start) [below=of done] {\texttt{start}};
-    \node[coordinate] (n1) [right=of idle-start] {};
-    \node[coordinate] at (idle -| n1) (n0) {};
-    \node[condout] (working-counter) [right=of working-datapath] {\texttt{counter\_do\_decrement}};
-    \node[coordinate] at (working -| working-counter) (n2) {};
-    \node[coordinate] at (working-is-zero -| working-counter) (n3) {};
-    \node[coordinate] (n5) [right=of done-start] {};
-    \node[coordinate] at (done -| n5) (n4) {};
-    \node[coordinate] (n7) [left=of done-start] {};
-    \node[coordinate] at (idle -| n7) (n6) {};
-    \draw (begin) -> (idle);
-    \draw (idle) -> (idle-start);
-    \draw (idle-start) -> node[right,very near start] {1} (idle-datapath);
-    \draw (idle-datapath) -> (idle-counter);
-    \draw (idle-counter) -> (working);
-    \draw (working) -> (working-datapath);
-    \draw (working-datapath) -> (working-is-zero);
-    \draw (working-is-zero) -> node[right,very near start] {1} (done);
-    \draw (done) -> (done-start);
-    \draw (idle-start) -- node[above,very near start] {0} (n1) -- (n0) -> (idle);
-    \draw (working-is-zero) -- node[above,very near start] {0} (n3) -> (working-counter);
-    \draw (working-counter) -- (n2) -> (working);
-    \draw (done-start) -- node[above,very near start] {1} (n5) -- (n4) -> (done);
-    \draw (done-start) -- node[above,very near start] {0} (n7) -- (n6) -> (idle);
-  \end{tikzpicture}
+  \input{asmchart.tex}
   \caption{An ASM chart representing the operation of the multiplier. Rectangular nodes represent states, and arrows represent possible transition paths. The text inside each state node lists the unconditional outputs that are active during that state; the name of the state is instead given by the label at the top-right corner of the node. Rounded rectangles represent conditional outputs that should be asserted only when the transition path is taken. Diamonds represent decisions (input tests).}
   \label{fig:asm}
 \end{figure}
@@ -180,28 +131,21 @@ In the Done state, the system holds the \texttt{ready} output high, signalling t
 \subsection{Implementation}
 \label{sec:seq:impl}
 
-The 2-bit counter used for counting the number of remaining iterations of the shift/add operation is implemented in the \texttt{multiplier\_counter} module, whose source code is given in Listing~\ref{lst:multiplier_counter}. The remainder of the state machine is implemented in the \texttt{multiplier\_controller} module, whose source code is given in Listing~\ref{lst:multiplier_controller}. After cleaning up some minor syntax errors, the simulation ran first time with all assertions passing.
-
-\modulelisting{multiplier_counter}{../src/multiplier/multiplier_counter.sv}
-  {Source code of the \texttt{multiplier\_counter} module, which contains the 2-bit counter that records the number of remaining iterations of the algorithm.}
-
-\modulelisting{multiplier_controller}{../src/multiplier/multiplier_controller.sv}
-  {Source code of the \texttt{multiplier\_controller} module, which contains the state machine that controls the multiplier's operation.}
+The 2-bit counter used for counting the number of remaining iterations of the shift/add operation is implemented in the \texttt{multiplier\_counter} module, whose source code is given in Listing~\ref{lst:multiplier_counter}. The remainder of the state machine is implemented in the \texttt{multiplier\_controller} module, whose source code is given in Listing~\ref{lst:multiplier_controller}.
 
 \subsection{Simulation}
 \label{sec:seq:sim}
 
-A testbench for the counter was prepared; its source code is given in Listing~\ref{lst:test_multiplier_counter}. Running this testbench through ModelSim gives the waveform shown in Figure~\ref{fig:test_multiplier_counter}.
+A testbench for the counter was prepared; its source code is given in Listing~\ref{lst:test_multiplier_counter}. Running this testbench through ModelSim gives the waveform shown in Figure~\ref{fig:wave:test_multiplier_counter}. After cleaning up minor syntax errors, the simulation ran first time with all assertions passing.
 
-\modulelisting{test_multiplier_counter}{../src/multiplier/test/test_multiplier_counter.sv}
-  {Source code of the \texttt{test\_multiplier\_counter} testbench, which tests the 2-bit counter used to keep track of the remaining number of iterations.}
+The testbench begins with the reset input set to low, resetting the counter to zero. At time \SI{2800}{\milli\second}, the \texttt{do\_preset} input is asserted, causing the count to be set to the maximum value (3) at the next clock edge (time \SI{3000}{\milli\second}). This signal is then de-asserted and the \texttt{do\_decrement} signal held high for three clock cycles. It can be observed that the count successfully decrements on each clock cycle that \texttt{do\_decrement} is held high for, eventually returning to zero. This behaviour is visible in the diagram.
 
-\waveformfigure{test_multiplier_counter}{Waveform of the \texttt{test\_multiplier\_counter} testbench. Values shown in the waveform traces are in hexadecimal.}
+Similarly, a testbench for the controller was also prepared. Listing~\ref{lst:test_multiplier_controller} gives the source code of this testbench, and Figure~\ref{fig:wave:test_multiplier_controller} shows the waveform produced by simulating the testbench in ModelSim. The testbench manipulates the \texttt{start} and \texttt{counter\_is\_zero} inputs to behave behave as if the system was performing multiplication. The controller can be seen to correctly assert \texttt{datapath\_do\_init}, then \texttt{datapath\_do\_shift} for four clock cycles, as expected.
 
 \subsection{Synthesis}
 \label{sec:seq:synth}
 
-\todo[inline]{todo}
+An diagram of the generated RTL logic for the sequencer was extracted from the synthesis of the design and is presented in Figure~\ref{fig:rtl:multiplier_controller}. The state machine at the core of this diagram as the transition diagram shown in Figure~\ref{fig:fsm} and the transition table outlined in Figure~\ref{tab:fsm}.
 
 \section{Multiplier design, simulation and synthesis}
 \label{sec:mult}
@@ -215,32 +159,112 @@ A seperate module, \texttt{machxo2\_pico\_frontend}, connects the multiplier's l
   \item the frequency divider that derives the multiplier's clock signal from the master clock
   \item the switch debouncer for the \texttt{start} button
 \end{itemize}
+Additionally, it defines the values of the multiplier's data inputs, \texttt{multiplicand} and \texttt{multiplier}. Since there are no physical switches available to control these inputs, they are hard-wired to constants. Values of 11 and 6 were arbitrarily chosen.
+
 The internal oscillator is an instance of \texttt{OSCH} with a nominal frequency of \SI{4.16}{\mega\hertz}. The frequency divider, implemented in the \texttt{freq\_divider} module, uses a 22-bit counter to reduce this frequency to \SI{0.99}{\hertz}, allowing each step of the multiplication operation to be observed in real time.
+
+The switch debouncer uses a simple counter to detect when the input becomes stable. The counter is incremented by one for every consecutive clock cycle in which the input differs from the current output. If the input returns to the same logic value as the output at any point, the counter is reset to zero. Once the counter reaches its maximum value, the input is assumed to have stopped oscillating, and so the current output state is updated to the same value as the input.
 
 \subsection{Implementation}
 \label{sec:mult:impl}
 
-The source code of the \texttt{multiplier}, \texttt{machxo2\_pico\_frontend} and \texttt{freq\_divider} modules is given in Listings~\ref{lst:multiplier}, \ref{lst:machxo2_pico_frontend} and \ref{lst:freq_divider} respectively.
-
-\modulelisting{multiplier}{../src/multiplier/multiplier.sv}
-  {Source code of the encapsulating module \texttt{multiplier}.}
-
-\modulelisting{machxo2_pico_frontend}{../src/frontends/machxo2_pico_frontend.sv}
-  {Source code of the MachXO2 Pico frontend module \texttt{machxo2\_pico\_frontend}.}
-
-\modulelisting{freq_divider}{../src/util/freq_divider.sv}
-  {Source code of the \texttt{freq\_divider} module, which implements a divide-by-$2^{22}$ frequency divider.}
+The source code of the \texttt{multiplier}, \texttt{freq\_divider}, \texttt{debouncer} and \texttt{machxo2\_pico\_frontend} modules is given in Listings~\ref{lst:multiplier}, \ref{lst:freq_divider}, \ref{lst:debouncer} and \ref{lst:machxo2_pico_frontend} respectively.
 
 \subsection{Simulation}
 \label{sec:mult:sim}
 
-\todo[inline]{todo}
+A testbench for the multiplier as a whole was written; its source code can be found in Listing~\ref{lst:test_multiplier}. Figure~\ref{fig:wave:test_multiplier} illustrates the result of running this testbench in ModelSim. It can be observed that an entire multiplication operation is completed in response to the \texttt{start} signal being brought high. The testbench contains assertions to check the values of \texttt{product} and \texttt{ready} at each clock cycle.
+
+Similarly, the \texttt{freq\_divider} module was also simulated in ModelSim. The testbench code is presented in Listing~\ref{lst:test_freq_divider}, producing the waveform shown in Figure~\ref{fig:wave:test_freq_divider}. For the purposes of simulation, the counter length was reduced from 22 bits to 8 bits, greatly reducing the length of time the simulation runs for. It can be seen that the output, \texttt{out\_clock}, has a much lower frequency than \texttt{in\_clock}. The testbench verifies through the use of assertions that the output frequency is $1/256$ the input frequency.
+
+Finally, the \texttt{debouncer} was also simulated using the testbench displayed in Listing~\ref{lst:test_debouncer}. The testbench generates an input signal that oscillates rapidly at first, but decays in frequency over time. As demonstrated in Figure~\ref{fig:wave:test_debouncer}, the debouncer correctly smoothes this signal to a single step.
+
+The \texttt{machxo2\_pico\_frontend} was not simulated as it depends on the built-in \texttt{OSCH} module, which is not available in external simulation tools such as ModelSim. Potentially, a simulatable drop-in replacement for \texttt{OSCH} could have been prepared, but \texttt{machxo2\_pico\_frontend} was not deemed to be complex enough to warrant this.
 
 \subsection{Synthesis}
 \label{sec:mult:synth}
 
 \todo[inline]{todo}
+\todo[inline]{RTL diagram}
 
+\section{Extensions}
+\label{sec:ext}
 
+\subsection{8-bit datapath}
+\label{sec:ext:8bit}
+
+\todo[inline]{todo}
+
+\section{Conclusion}
+\label{sec:con}
+
+\todo[inline]{todo}
+
+\section{References}
+
+\todo[inline]{sample code used as inspiration}
+\todo[inline]{shift/add algo}
+\todo[inline]{debounce algo}
+
+\modulelisting{multiplier_datapath}{../src/multiplier/multiplier_datapath.sv}
+  {Source code of the \texttt{multiplier\_datapath} module, which contains the data registers $a$ and $q$ and the add/shift computation logic.}
+
+\modulelisting{test_multiplier_datapath}{../src/multiplier/test/test_multiplier_datapath.sv}
+  {Source code of the \texttt{test\_multiplier\_datapath} module, which tests the operation of the data registers and add/shift computation logic.}
+
+\modulelisting{multiplier_counter}{../src/multiplier/multiplier_counter.sv}
+  {Source code of the \texttt{multiplier\_counter} module, which contains the 2-bit counter that records the number of remaining iterations of the algorithm.}
+
+\modulelisting{test_multiplier_counter}{../src/multiplier/test/test_multiplier_counter.sv}
+  {Source code of the \texttt{test\_multiplier\_counter} module, which tests the 2-bit counter used to keep track of the remaining number of iterations.}
+
+\modulelisting{multiplier_controller}{../src/multiplier/multiplier_controller.sv}
+  {Source code of the \texttt{multiplier\_controller} module, which contains the state machine that controls the multiplier's operation.}
+
+\modulelisting{test_multiplier_controller}{../src/multiplier/test/test_multiplier_controller.sv}
+  {Source code of the \texttt{test\_multiplier\_controller} module, which tests the operation of the state machine.}
+
+\modulelisting{multiplier}{../src/multiplier/multiplier.sv}
+  {Source code of the encapsulating module \texttt{multiplier}.}
+
+\modulelisting{test_multiplier}{../src/multiplier/test/test_multiplier.sv}
+  {Source code of the \texttt{test\_multiplier} module, which tests the operation of the multiplier as a whole.}
+
+\modulelisting{freq_divider}{../src/util/freq_divider.sv}
+  {Source code of the \texttt{freq\_divider} module, which implements a divide-by-$2^{22}$ frequency divider.}
+
+\modulelisting{test_freq_divider}{../src/util/test/test_freq_divider.sv}
+  {Source code of the \texttt{test\_freq\_divider} module, which tests the frequency divider.}
+
+\modulelisting{debouncer}{../src/util/debouncer.sv}
+  {Source code of the \texttt{debouncer} module, which implements a simple switch debouncer for the start button.}
+
+\modulelisting{test_debouncer}{../src/util/test/test_debouncer.sv}
+  {Source code of the \texttt{test\_debouncer} module, which tests the start button debouncer.}
+
+\modulelisting{machxo2_pico_frontend}{../src/frontends/machxo2_pico_frontend.sv}
+  {Source code of the MachXO2 Pico frontend module \texttt{machxo2\_pico\_frontend}.}
+
+\waveformfigure{test_multiplier_datapath}{Waveform of the \texttt{test\_multiplier\_datapath} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
+\waveformfigure{test_multiplier_counter}{Waveform of the \texttt{test\_multiplier\_counter} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
+\waveformfigure{test_multiplier_controller}{Waveform of the \texttt{test\_multiplier\_controller} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
+\waveformfigure{test_multiplier}{Waveform of the \texttt{test\_multiplier} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
+\waveformfigure{test_freq_divider}{Waveform of the \texttt{test\_freq\_divider} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
+\waveformfigure{test_debouncer}{Waveform of the \texttt{test\_debouncer} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
+\rtlfigure{multiplier_controller}{Diagram of the synthesised RTL generated for the \texttt{multiplier\_controller} module by Synplify Pro.}
+
+\begin{figure}[tbp]
+  \centering\includegraphics[width=10cm]{assets/rtl/fsm}
+  \caption{State transition diagram generated for the \texttt{multiplier\_controller} module by Synplify Pro.}
+  \label{fig:fsm}
+\end{figure}
+
+\todo[inline]{tab:fsm}
 
 \end{document}
