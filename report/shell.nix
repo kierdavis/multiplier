@@ -1,10 +1,11 @@
 with import <nixpkgs> {};
 stdenv.mkDerivation {
-  name = "d1-report-env";
+  name = "d1report-env";
   buildInputs = [
     pkgs.python27Packages.pygments
     (pkgs.texlive.combine {
       inherit (pkgs.texlive) scheme-basic
+        booktabs
         caption
         etoolbox # dependency of minted
         fancyvrb # dependency of minted
@@ -22,6 +23,7 @@ stdenv.mkDerivation {
         xcolor # dependency of minted, todonotes
         xkeyval # dependency of todonotes
         xstring # dependency of minted
+        wrapfig
       ;
     })
   ];

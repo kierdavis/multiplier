@@ -1,6 +1,7 @@
 \documentclass[a4paper]{article}
 
 \usepackage[svgnames]{xcolor}
+\usepackage{booktabs}
 \usepackage[font=small,format=plain,labelfont=bf,up,textfont=up]{caption}
 \usepackage{fancyvrb}
 \usepackage[margin=2cm]{geometry}
@@ -10,21 +11,27 @@
 \usepackage{siunitx}
 \usepackage{tikz}
 \usepackage{todonotes} % Only for drafting
+\usepackage{wrapfig}
 
 \usetikzlibrary{positioning,shapes}
 
 % Args are module name, filename, caption text
+% \newcommand{\modulelisting}[3]{
+%   \begin{listing}[tp]
+%     \linespread{.9}\inputminted[fontsize=\scriptsize,linenos]{systemverilog}{#2}
+%     \caption{#3}
+%     \label{lst:#1}
+%   \end{listing}
+% }
 \newcommand{\modulelisting}[3]{
-  \begin{listing}[tbp]
-    \linespread{.9}\inputminted[fontsize=\scriptsize,linenos]{systemverilog}{#2}
-    \caption{#3}
-    \label{lst:#1}
-  \end{listing}
+  \captionof{listing}{#3\label{lst:#1}}
+  \linespread{.9}\inputminted[frame=single,fontsize=\scriptsize,linenos]{systemverilog}{#2}
+  \vspace{20pt}
 }
 
 % Args are module name, caption text
 \newcommand{\waveformfigure}[2]{
-  \begin{figure}[tbp]
+  \begin{figure}[tp]
     \centering\includegraphics[width=\textwidth]{assets/waveforms/#1}
     \caption{#2}
     \label{fig:wave:#1}
@@ -33,7 +40,7 @@
 
 % Args are module name, caption text
 \newcommand{\rtlfigure}[2]{
-  \begin{figure}[tbp]
+  \begin{figure}[tp]
     \centering\includegraphics[width=\textwidth]{assets/rtl/#1}
     \caption{#2}
     \label{fig:rtl:#1}
@@ -58,6 +65,10 @@ Lab session: November 21, 2016}
 \begin{abstract}
   A 4-bit unsigned sequential multiplier was implemented in SystemVerilog. The multiplier was thoroughly tested by preparing testbenches for each component of the multiplier, then simulating them in ModelSim. The design was then synthesised for and downloaded onto a Lattice MachXO2 CPLD and tested manually. Finally, the multiplier was extended to operate on 8-bit numbers before being simulated and synthesised again.
 \end{abstract}
+
+% Shift+add in one clock cycle
+% All modules parameterised by N -> easy 8 bit extension
+% Testbenches use assertions
 
 \section{Adder design, simulation and synthesis}
 \label{sec:adder}
@@ -110,23 +121,34 @@ A testbench for the \texttt{multiplier\_datapath} module was prepared. Its sourc
 
 The testbench begins with the reset signal active, and checks that the registers \texttt{a} and \texttt{q} (whose values are concatenated to form the signal \texttt{product}) are reset to zero. It then releases the system from reset, and asserts the \texttt{do\_init} for one clock cycle, checking that \texttt{q} is set to 6, the value arbitrarily chosen for the second multiplier input. It then asserts \texttt{do\_shift} for four of the five following clock cycles, checking the state of the registers at each stage. The results of these operations can be observed in Figure~\ref{fig:wave:test_multiplier_datapath}.
 
+\waveformfigure{test_multiplier_datapath}{Waveform of the \texttt{test\_multiplier\_datapath} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
+\subsection{Synthesis}
+\label{sec:reg:synth}
+
+The RTL generated for the \texttt{multiplier\_datapath} module during the synthesis process is shown in Figure~\ref{fig:rtl:multiplier_datapath}.
+
+\rtlfigure{multiplier_datapath}{Diagram of the synthesised RTL generated for the \texttt{multiplier\_datapath} module by Synplify Pro.}
+
 \section{Sequencer design, simulation and synthesis}
 \label{sec:seq}
 
 The multiplier is controlled by an algorithmic state machine (ASM), which is implemented in the \texttt{multiplier\_controller} module. It uses an auxillary 2-bit counter to store the number of remaining cycles of the shift/add operation. This counter has two control signal inputs, \texttt{do\_preset} and \texttt{do\_decrement}. \texttt{do\_preset} causes the value of the counter to its maximum value (3) on the next clock cycle, while \texttt{do\_decrement} causes the value of the counter to be decreased by 1 on the next clock cycle. It has only one output, \texttt{is\_zero}, which is high if the counter is equal to zero.
+
+%\begin{wrapfigure}{r}{.5\textwidth}
+\begin{figure}[tp]
+  \centering
+  \input{asmchart.tex}
+  \caption{An ASM chart outlining the operation of the multiplier. Rectangular nodes represent states, and arrows represent possible transition paths. The text inside each state node lists the unconditional outputs that are active during that state; the name of the state is instead given by the label at the top-right corner of the node. Rounded rectangles represent conditional outputs that should be asserted only when the transition path is taken. Diamonds represent decisions (input tests).}
+  \label{fig:asm}
+%\end{wrapfigure}
+\end{figure}
 
 The state machine, illustrated in Figure~\ref{fig:asm}, has three states named Idle, Working and Done. The system begins in the Idle state. When the \texttt{start} signal goes high, the system moves to the Working state. On this transition, the \texttt{a} and \texttt{q} registers are initialised by setting the datapath's \text{do\_init} signal high, and the counter is set to its maximum value by settings its \texttt{do\_preset} signal high.
 
 While in the Working state, the datapath's \texttt{do\_shift} control input is held high, causing the \texttt{a} and \texttt{q} registers to be continually shifted and added. The state of the \texttt{is\_zero} signal is checked on each clock cycle; if it is high, then the system moves to the Done state, else it decreases the value of the counter by one by asserting the \texttt{do\_decrement} signal. Since \texttt{do\_shift} is still asserted when the counter's value is zero, it will be high for four clock cycles in a row, resulting in four iterations of the shift/add operation being applied to the \texttt{a} and \texttt{q} registers.
 
 In the Done state, the system holds the \texttt{ready} output high, signalling the end of computation. It waits for the \texttt{start} input to go low again before transitioning back to the Idle state.
-
-\begin{figure}[tbp]
-  \centering
-  \input{asmchart.tex}
-  \caption{An ASM chart representing the operation of the multiplier. Rectangular nodes represent states, and arrows represent possible transition paths. The text inside each state node lists the unconditional outputs that are active during that state; the name of the state is instead given by the label at the top-right corner of the node. Rounded rectangles represent conditional outputs that should be asserted only when the transition path is taken. Diamonds represent decisions (input tests).}
-  \label{fig:asm}
-\end{figure}
 
 \subsection{Implementation}
 \label{sec:seq:impl}
@@ -140,12 +162,44 @@ A testbench for the counter was prepared; its source code is given in Listing~\r
 
 The testbench begins with the reset input set to low, resetting the counter to zero. At time \SI{2800}{\milli\second}, the \texttt{do\_preset} input is asserted, causing the count to be set to the maximum value (3) at the next clock edge (time \SI{3000}{\milli\second}). This signal is then de-asserted and the \texttt{do\_decrement} signal held high for three clock cycles. It can be observed that the count successfully decrements on each clock cycle that \texttt{do\_decrement} is held high for, eventually returning to zero. This behaviour is visible in the diagram.
 
+\waveformfigure{test_multiplier_counter}{Waveform of the \texttt{test\_multiplier\_counter} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
 Similarly, a testbench for the controller was also prepared. Listing~\ref{lst:test_multiplier_controller} gives the source code of this testbench, and Figure~\ref{fig:wave:test_multiplier_controller} shows the waveform produced by simulating the testbench in ModelSim. The testbench manipulates the \texttt{start} and \texttt{counter\_is\_zero} inputs to behave behave as if the system was performing multiplication. The controller can be seen to correctly assert \texttt{datapath\_do\_init}, then \texttt{datapath\_do\_shift} for four clock cycles, as expected.
+
+\waveformfigure{test_multiplier_controller}{Waveform of the \texttt{test\_multiplier\_controller} testbench. Numbers shown in the waveform traces are in hexadecimal.}
 
 \subsection{Synthesis}
 \label{sec:seq:synth}
 
-An diagram of the generated RTL logic for the sequencer was extracted from the synthesis of the design and is presented in Figure~\ref{fig:rtl:multiplier_controller}. The state machine at the core of this diagram as the transition diagram shown in Figure~\ref{fig:fsm} and the transition table outlined in Figure~\ref{tab:fsm}.
+Diagrams of the generated RTL logic for the counter and sequencer were extracted from the synthesis of the design and are presented in Figures~\ref{fig:rtl:multiplier_counter} and \ref{fig:rtl:multiplier_controller} respectively. The state machine at the core of the diagram for the sequencer has the transition diagram displayed in Figure~\ref{fig:fsm} and the transition table shown in Table~\ref{tab:fsm}.
+
+\rtlfigure{multiplier_counter}{Diagram of the synthesised RTL generated for the \texttt{multiplier\_counter} module by Synplify Pro.}
+
+\rtlfigure{multiplier_controller}{Diagram of the synthesised RTL generated for the \texttt{multiplier\_controller} module by Synplify Pro.}
+
+\begin{figure}[tp]
+  \centering\includegraphics[width=.3\textwidth]{assets/rtl/fsm}
+  \caption{State transition diagram generated for the \texttt{multiplier\_controller} module by Synplify Pro.}
+  \label{fig:fsm}
+\end{figure}
+
+\begin{table}[tp]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    From state & To state & Condition \\
+    \midrule
+    \texttt{00} & \texttt{00} & \texttt{!start} \\
+    \texttt{00} & \texttt{01} & \texttt{start} \\
+    \texttt{01} & \texttt{01} & \texttt{!counter\_is\_zero} \\
+    \texttt{01} & \texttt{10} & \texttt{counter\_is\_zero} \\
+    \texttt{10} & \texttt{00} & \texttt{!start} \\
+    \texttt{10} & \texttt{10} & \texttt{start} \\
+    \bottomrule
+  \end{tabular}
+  \caption{State transition table generated for the \texttt{multiplier\_controller} module by Synplify Pro.}
+  \label{tab:fsm}
+\end{table}
 
 \section{Multiplier design, simulation and synthesis}
 \label{sec:mult}
@@ -175,17 +229,26 @@ The source code of the \texttt{multiplier}, \texttt{freq\_divider}, \texttt{debo
 
 A testbench for the multiplier as a whole was written; its source code can be found in Listing~\ref{lst:test_multiplier}. Figure~\ref{fig:wave:test_multiplier} illustrates the result of running this testbench in ModelSim. It can be observed that an entire multiplication operation is completed in response to the \texttt{start} signal being brought high. The testbench contains assertions to check the values of \texttt{product} and \texttt{ready} at each clock cycle.
 
+\waveformfigure{test_multiplier}{Waveform of the \texttt{test\_multiplier} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
 Similarly, the \texttt{freq\_divider} module was also simulated in ModelSim. The testbench code is presented in Listing~\ref{lst:test_freq_divider}, producing the waveform shown in Figure~\ref{fig:wave:test_freq_divider}. For the purposes of simulation, the counter length was reduced from 22 bits to 8 bits, greatly reducing the length of time the simulation runs for. It can be seen that the output, \texttt{out\_clock}, has a much lower frequency than \texttt{in\_clock}. The testbench verifies through the use of assertions that the output frequency is $1/256$ the input frequency.
 
+\waveformfigure{test_freq_divider}{Waveform of the \texttt{test\_freq\_divider} testbench. Numbers shown in the waveform traces are in hexadecimal.}
+
 Finally, the \texttt{debouncer} was also simulated using the testbench displayed in Listing~\ref{lst:test_debouncer}. The testbench generates an input signal that oscillates rapidly at first, but decays in frequency over time. As demonstrated in Figure~\ref{fig:wave:test_debouncer}, the debouncer correctly smoothes this signal to a single step.
+
+\waveformfigure{test_debouncer}{Waveform of the \texttt{test\_debouncer} testbench. Numbers shown in the waveform traces are in hexadecimal.}
 
 The \texttt{machxo2\_pico\_frontend} was not simulated as it depends on the built-in \texttt{OSCH} module, which is not available in external simulation tools such as ModelSim. Potentially, a simulatable drop-in replacement for \texttt{OSCH} could have been prepared, but \texttt{machxo2\_pico\_frontend} was not deemed to be complex enough to warrant this.
 
 \subsection{Synthesis}
 \label{sec:mult:synth}
 
-\todo[inline]{todo}
-\todo[inline]{RTL diagram}
+The entire design was synthesised using Synplify Pro as part of the Lattice Diamond design flow. A block diagram of the system can be generated using the RTL netlist viewer; this is shown in Figure~\ref{fig:rtl:machxo2_pico_frontend}.
+
+\rtlfigure{machxo2_pico_frontend}{Block diagram of the synthesised RTL generated for the top-level \texttt{machxo2\_pico\_frontend} module by Synplify Pro. Five of the eight output buffers (located at the bottom-right of the diagram) have been omitted for brevity.}
+
+\todo[inline]{Anything more to say about this?}
 
 \section{Extensions}
 \label{sec:ext}
@@ -206,8 +269,15 @@ The \texttt{machxo2\_pico\_frontend} was not simulated as it depends on the buil
 \todo[inline]{shift/add algo}
 \todo[inline]{debounce algo}
 
+\newpage
+\section{Source code}
+
+All source code is mirrored online at \url{https://github.com/kierdavis/multiplier}.
+
 \modulelisting{multiplier_datapath}{../src/multiplier/multiplier_datapath.sv}
   {Source code of the \texttt{multiplier\_datapath} module, which contains the data registers $a$ and $q$ and the add/shift computation logic.}
+
+\newpage
 
 \modulelisting{test_multiplier_datapath}{../src/multiplier/test/test_multiplier_datapath.sv}
   {Source code of the \texttt{test\_multiplier\_datapath} module, which tests the operation of the data registers and add/shift computation logic.}
@@ -227,6 +297,8 @@ The \texttt{machxo2\_pico\_frontend} was not simulated as it depends on the buil
 \modulelisting{multiplier}{../src/multiplier/multiplier.sv}
   {Source code of the encapsulating module \texttt{multiplier}.}
 
+\newpage
+
 \modulelisting{test_multiplier}{../src/multiplier/test/test_multiplier.sv}
   {Source code of the \texttt{test\_multiplier} module, which tests the operation of the multiplier as a whole.}
 
@@ -244,27 +316,5 @@ The \texttt{machxo2\_pico\_frontend} was not simulated as it depends on the buil
 
 \modulelisting{machxo2_pico_frontend}{../src/frontends/machxo2_pico_frontend.sv}
   {Source code of the MachXO2 Pico frontend module \texttt{machxo2\_pico\_frontend}.}
-
-\waveformfigure{test_multiplier_datapath}{Waveform of the \texttt{test\_multiplier\_datapath} testbench. Numbers shown in the waveform traces are in hexadecimal.}
-
-\waveformfigure{test_multiplier_counter}{Waveform of the \texttt{test\_multiplier\_counter} testbench. Numbers shown in the waveform traces are in hexadecimal.}
-
-\waveformfigure{test_multiplier_controller}{Waveform of the \texttt{test\_multiplier\_controller} testbench. Numbers shown in the waveform traces are in hexadecimal.}
-
-\waveformfigure{test_multiplier}{Waveform of the \texttt{test\_multiplier} testbench. Numbers shown in the waveform traces are in hexadecimal.}
-
-\waveformfigure{test_freq_divider}{Waveform of the \texttt{test\_freq\_divider} testbench. Numbers shown in the waveform traces are in hexadecimal.}
-
-\waveformfigure{test_debouncer}{Waveform of the \texttt{test\_debouncer} testbench. Numbers shown in the waveform traces are in hexadecimal.}
-
-\rtlfigure{multiplier_controller}{Diagram of the synthesised RTL generated for the \texttt{multiplier\_controller} module by Synplify Pro.}
-
-\begin{figure}[tbp]
-  \centering\includegraphics[width=10cm]{assets/rtl/fsm}
-  \caption{State transition diagram generated for the \texttt{multiplier\_controller} module by Synplify Pro.}
-  \label{fig:fsm}
-\end{figure}
-
-\todo[inline]{tab:fsm}
 
 \end{document}
